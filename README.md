@@ -12,7 +12,7 @@ Apache HBase is an open source NoSQL database based on the wide-column data stor
 
 ##Chapter2 Apache HBase AND HDFS
 1. As a result, the directory structure in HDFS for data files is as follows:
->		/hbase/<tablename>/<encoded-regionname>/<column-family>/<filename>
+<code>		/hbase/<tablename>/<encoded-regionname>/<column-family>/<filename> </code>
 2. Compaction is the process of creating a larger file by merging smaller files. Compaction can become necessary if HBase has scanned too many files to find a result but is not able to find a result. After the number of files scanned exceeds the limit set in hbase.hstore.compaction.max, parameter compaction is performed to merge files to create a larger file.
 3. When data is added to HBase, the following sequence is used to store the data:
 A. The data is first written to a WAL called HLog.
@@ -29,3 +29,12 @@ D. HBase merges smaller HFiles into larger HFiles with a process called compacti
 1. A KeyValue consists of the key and a value, with the key being comprised of the row key plus the column family plus the column qualifier plus the timestamp. The value is the data identified by the key. The timestamp represents a particular version.
 2. Each row has same column families.Each row can have different column qualifiers within a column family.
 3. What makes a HBase table sparse is that each row does not have to include all the column families. Each column family is stored in its own data file. As a result, some data files may not include data for some of the rows if the rows do not store data in those column families.
+4. Coordinates for a cell arerow key ➤ column key ➤ version.Physical coordinates for a cell are region directory ➤ column family directory ➤ rowkey ➤ column family name ➤ column qualifier ➤ version
+5.Versions are sorted from newest to oldest by sorting the timestamps lexicographically.
+##Chapter8 Major Components of a Cluster
+1. HBase runs in two modes: standalone and distributed. On a distributed cluster, the Master is typically on the same node as the HDFS NameNode, and the RegionServers are on the same node as a HDFS Datanode, with each RegionServer being collocated with a datanode. 
+2. For a small cluster, a ZooKeeper may be collocated with the NameNode (not the datanode), but for a large cluster, the ZooKeeper should run on a separate node. 
+3. The Master manages the cluster.RegionServers manage data. 
+4. The ZooKeeper bootstraps and coordinates the cluster. 
+5. A region has a startKey and a endKey and contains a sorted, contiguous range of rows.
+6. HBase has two in-memory structures: MemStore and block cache. While MemStore is for the Write path, the block cache is for the Read path. Reads read block cache first, and if the requested data is not found, the HFile on the disk is read. A block cache is provided for frequently read data and reduces the read latency. Regardless of the number of columns, atomicity is provided at row level.
